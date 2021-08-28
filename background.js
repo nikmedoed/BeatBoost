@@ -20,15 +20,12 @@ async function onEventHandler (message, sender, sendResponse) {
   try {
     switch (message) {
       case 'getState':
-        // getState().then(state => sendResponse(state))
         let state = await getState()
         // console.log('getState', state)
         sendResponse(state)
         break
       case 'restart': // Для разработки пригодится начинать сначала
       case 'updateList':
-        // loadNewList().then(values => {
-        //   console.log('loadNewList', values)
         let values = await loadNewList(message == 'restart')
         // console.log('values', values)
         sendResponse({ success: values.POSITION < values.LIST.length - 1 })
@@ -44,7 +41,8 @@ async function onEventHandler (message, sender, sendResponse) {
         sendResponse({ success: true })
         break
       case 'continue':
-        startPlay() // TODO научиться делать паузу не закрывая вкладку, но отслеживая закрытие
+        startPlay()
+        // TODO научиться делать паузу не закрывая вкладку, но отслеживая закрытие
         sendResponse({ success: true })
         break
     }

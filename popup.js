@@ -19,12 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 
 function buttonClicker (id) {
-  //   console.log('buttonClicker', id)
   chrome.runtime.sendMessage(id, response => responseTipical(response))
 }
 
 function responseTipical (response) {
-  //   console.log('responseTipical', response)
   if (response.success) {
     updateInterface()
   } else {
