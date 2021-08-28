@@ -1,0 +1,113 @@
+@font-face {
+    font-family: 'GT Walsheim Pro';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(GTWalsheimPro-Medium.woff2)
+}
+
+@font-face {
+    font-family: 'GT Walsheim Pro';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url(GTWalsheimPro-Black.woff2)
+}
+
+.component-1 {
+    background-color: rgba(29, 32, 43, 1);
+    padding: 15px 40px 15px 40px;
+    box-shadow: -1px -2px 6px 0 rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 320px;
+}
+
+
+.logo-3 {
+    height: 31.68%;
+    margin-bottom: 1px;
+    display: flex;
+    text-align: center;
+}
+
+.bb {
+    height: 6%;
+    font-family: "GT Walsheim Pro";
+    font-size: 39px;
+    font-weight: 700;
+    line-height: normal;
+    color: white;
+    display: flex;
+    text-align: center;
+    margin-top: -3px
+}
+
+.ver {
+    height: 3%;
+    font-family: "GT Walsheim Pro";
+    font-size: 18px;
+    font-weight: 400;
+    line-height: normal;
+    color: rgba(255, 255, 255, 0.5);
+    display: flex;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.name {
+    height: 3%;
+    font-family: "GT Walsheim Pro";
+    font-size: 11px;
+    font-weight: 400;
+    line-height: normal;
+    color: rgba(255, 255, 255, 0.5);
+    display: flex;
+    text-align: center;
+    margin-bottom: 1em;
+}
+
+#progress {
+    font-size: 16px;
+}
+
+.tes {
+    height: 16.41%;
+    font-family: "GT Walsheim Pro";
+    font-size: 14px;
+    font-weight: 400;
+    line-height: normal;
+    color: white;
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+    margin: 1em 0;
+}
+
+p {
+    margin: 0;
+}
+
+.button {
+    outline: none;
+    border-radius: 15px;
+    padding: 10px 35px;
+    margin: 5px;
+    font-family: "GT Walsheim Pro";
+    font-weight: 700;
+    font-size: 18px;
+    background-color: #FFB400;
+    transition: all 250ms ease;
+    text-align: center;
+}
+
+.button:hover {
+    transform: scale(1.05);
+    background-color: #E19F00;
+}
+
+.button:active {
+    transform: scale(0.99);
+    background-color: #E19F00;
+}
