@@ -1,7 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-  //   chrome.storage.sync.set({
-  //     POSITION: -1
-  //   })
   try {
     const manData = chrome.runtime.getManifest()
     document.querySelector('.ver').textContent = `Версия: ${manData.version}`
@@ -19,7 +16,21 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 
 function buttonClicker (id) {
-  chrome.runtime.sendMessage(id, response => responseTipical(response))
+  if (id) {
+    chrome.runtime.sendMessage(id, response => responseTipical(response))
+  } else {
+    resetPlugin()
+  }
+}
+
+function resetPlugin () {
+  chrome.storage.sync.set({
+    POSITION: -1,
+    USER: '',
+    LIST: []
+  })
+  showSelectedButton([])
+  updateInterface()
 }
 
 function responseTipical (response) {
@@ -32,10 +43,10 @@ function responseTipical (response) {
 
 function setUser () {
   setMessage(
-    `Укажите ваше имя в поле ниже и нажмиnt Enter. \n` +
-      `Не менее 5 символов` +
-      `Это обязательно. \n` +
-      `Изменить нельзя. \n`
+    `Укажите ваше имя в поле ниже и нажмиnt Enter. ` +
+      `Не менее 5 символов. ` +
+      `Это обязательно. ` +
+      `Изменить нельзя. `
   )
   let field = document.querySelector('input')
   field.hidden = false
@@ -124,10 +135,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   return true
 })
-
-function showButton (name) {
-  document.querySelector(`#${name}`).hidden = false
-}
 
 function showSelectedButton (butts) {
   for (butt of document.querySelectorAll('button')) {

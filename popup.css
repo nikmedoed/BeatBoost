@@ -89,7 +89,7 @@ p {
     margin: 0;
 }
 
-.button {
+button {
     outline: none;
     border-radius: 15px;
     padding: 10px 35px;
@@ -102,12 +102,44 @@ p {
     text-align: center;
 }
 
-.button:hover {
+button:hover {
     transform: scale(1.05);
     background-color: #E19F00;
 }
 
-.button:active {
+button:active {
     transform: scale(0.99);
     background-color: #E19F00;
+}
+
+
+input {
+    padding: 10px 0;
+    width: 300px;
+    outline: none;
+    border-radius: 18px;
+    margin-bottom: 20px;
+    font-family: "GT Walsheim Pro";
+    font-weight: 500;
+    font-size: 18px;
+    background-color: #1d202b;
+    transition: all 250ms ease;
+    color: white;
+    text-align: center; 
+}
+
+input:hover {
+    transform: scale(1.03);
+    background-color: #1d202b;
+}
+
+input:active {
+    transform: scale(0.99);
+    background-color: #1d202b;
+}
+
+input:focus {
+    transform: scale(1.03);
+    background-color: #1d202b;
+    box-shadow: 0 0 0 1pt #FFB400;
 }
