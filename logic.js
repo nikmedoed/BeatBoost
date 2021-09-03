@@ -12,15 +12,7 @@ import {
   USER
 } from './constants.js'
 
-function likeVideoInjection (time) {
-  setTimeout(() => {
-    const list = document.querySelectorAll('ytd-toggle-button-renderer')
-    const elem = list[list.length - 2]
-    if (!elem.classList.contains('style-default-active')) {
-      elem.click()
-    }
-  }, time)
-}
+import { likeVideoInjection } from './likeinjection.js'
 
 async function likeManager (tabId) {
   if (Math.random() > 0.5) {
@@ -34,8 +26,10 @@ async function likeManager (tabId) {
           func: likeVideoInjection,
           args: [
             Math.floor(
-              LIKE_PAUSE_MINUTES +
-                Math.random() * LIKE_PAUSE_RANDOM_PART_MINUTES * 60 * 1000
+              (LIKE_PAUSE_MINUTES +
+                Math.random() * LIKE_PAUSE_RANDOM_PART_MINUTES) *
+                60 *
+                1000
             )
           ]
         }),
