@@ -6,6 +6,10 @@ export const TIMER_RANDOM_PART_MINUTES = 1
 export const LIKE_PAUSE_MINUTES = 1
 export const LIKE_PAUSE_RANDOM_PART_MINUTES = 0.5
 
+export const SUBSCRIBE_PAUSE_MINUTES = 1
+export const SUBSCRIBE_PAUSE_RANDOM_PART_MINUTES = 1
+
+
 export const FILE_LINK =
   'https://raw.githubusercontent.com/davidbeatsss/bruh/main/list.txt'
 

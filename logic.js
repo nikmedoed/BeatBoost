@@ -9,33 +9,35 @@ import {
   STATE,
   POSITION,
   LIST,
-  USER
+  USER,
+  SUBSCRIBE_PAUSE_MINUTES,
+  SUBSCRIBE_PAUSE_RANDOM_PART_MINUTES
 } from './constants.js'
 
 import { likeVideoInjection } from './likeinjection.js'
 
+function randomInMS (fix, rnd) {
+  return Math.floor((fix + Math.random() * rnd) * 60 * 1000)
+}
+
 async function likeManager (tabId) {
-  if (Math.random() > 0.5) {
-    // console.log('ShouldBeLiked')
-    setTimeout(
-      () =>
-        chrome.scripting.executeScript({
-          target: {
-            tabId: tabId
-          },
-          func: likeVideoInjection,
-          args: [
-            Math.floor(
-              (LIKE_PAUSE_MINUTES +
-                Math.random() * LIKE_PAUSE_RANDOM_PART_MINUTES) *
-                60 *
-                1000
-            )
-          ]
-        }),
-      3000
-    )
-  }
+  setTimeout(
+    () =>
+      chrome.scripting.executeScript({
+        target: {
+          tabId: tabId
+        },
+        func: likeVideoInjection,
+        args: [
+          randomInMS(LIKE_PAUSE_MINUTES, LIKE_PAUSE_RANDOM_PART_MINUTES),
+          randomInMS(
+            SUBSCRIBE_PAUSE_MINUTES,
+            SUBSCRIBE_PAUSE_RANDOM_PART_MINUTES
+          )
+        ]
+      }),
+    3000
+  )
 }
 
 export function sendToSheet (user, percent) {
