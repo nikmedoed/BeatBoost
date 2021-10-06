@@ -6,6 +6,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector(
       '#description'
     ).textContent = `${manData.description}`
+    document.querySelector('#resetbutton').addEventListener('click', () => {
+      if (
+        confirm(
+          'Это действие удалит все настройки и сбросит расширение в изначальное состояние (будто только установили). Если вы хотите поменять имя или группу, то лучше дождаться следующего цикла, или придётся начать сначала.\nВы уверены, что хотите начать сначала?'
+        )
+      ) {
+        resetPlugin()
+      }
+    })
   } catch (err) {
     console.log('ошибос версии и названий', err)
   }
@@ -24,9 +33,11 @@ function buttonClicker (id) {
 }
 
 function resetPlugin () {
-  chrome.storage.sync.set({
+  chrome.storage.local.set({
     POSITION: -1,
     USER: '',
+    GROUP: '',
+    GROUPNAME: '',
     LIST: []
   })
   showSelectedButton([])
@@ -61,7 +72,7 @@ function validateName (user) {
   if (user.length < 5) {
     setMessage('Не менее 5 символов!! Изменить нельзя')
   } else {
-    chrome.storage.sync.set(
+    chrome.storage.local.set(
       {
         USER: user
       },
@@ -73,50 +84,102 @@ function validateName (user) {
   }
 }
 
+function loaderShow () {
+  document.querySelector('#loader').className = 'loader loader4'
+}
+
+function loaderHide () {
+  document.querySelector('#loader').className = ''
+}
+
+function storeGroup (group) {
+  loaderShow()
+  chrome.storage.local.set({ GROUP: group[0], GROUPNAME: group[1] }, () => {
+    chrome.runtime.sendMessage('updateList', response => {
+      responseTipical(response)
+      loaderHide()
+      container.hidden = true
+    })
+    let container = document.querySelector('#groupselect')
+    while (container.firstChild) {
+      container.removeChild(container.firstChild)
+    }
+  })
+}
+
+function setGroup () {
+  let field = document.querySelector('#groupselect')
+  if (field.hidden) {
+    loaderShow()
+    chrome.runtime.sendMessage('getGroups', response => {
+      for (let but of response) {
+        let button = document.createElement('button')
+        button.appendChild(document.createTextNode(but[1]))
+        button.addEventListener('click', () => storeGroup(but))
+        field.appendChild(button)
+      }
+      loaderHide()
+    })
+    setMessage(`Выберите группу (чат), в которой вы состоите.`)
+    field.hidden = false
+  }
+}
+
 function updateInterface () {
   let progressmessage = ''
   let progress = ''
-  chrome.storage.sync.get(['POSITION', 'LIST', 'USER'], result => {
-    console.log(result)
-    let user = result.USER
-    if (!user || user.length < 5) {
-      setUser()
-    } else {
-      try {
-        document.querySelector('.name').textContent = `Привет, ${user}`
-        const pos = (result.POSITION !== 'undefined' ? result.POSITION : -1) + 1
-        const len = (result.LIST && result.LIST.length) || 0
-        progress += `Прогресс: ${pos} / ${len} ( ${len &&
-          Math.round((100 * pos) / len)}% )`
-        if (pos == 0) {
-          showSelectedButton(['start'])
+  chrome.storage.local.get(
+    ['POSITION', 'LIST', 'USER', 'GROUP', 'GROUPNAME'],
+    result => {
+      // console.log(result)
+      let user = result.USER
+      let group = result.GROUP
+      if (!user || user.length < 5) {
+        setUser()
+      } else {
+        if (!group) {
+          setGroup()
         } else {
-          if (pos != len) {
-            chrome.runtime.sendMessage('getState', state => {
-              showSelectedButton([
-                // 'restart',
-                state == 'pause' ? 'continue' : 'pause'
-              ])
-            })
-          } else {
-            progressmessage += 'Все видео просмотрены'
-            showSelectedButton(['restart'])
-            chrome.runtime.sendMessage('updateList', response =>
-              responseTipical(response)
-            )
+          try {
+            document.querySelector(
+              '.name'
+            ).textContent = `Привет, ${user} из группы "${result.GROUPNAME}"`
+            const pos =
+              (result.POSITION !== 'undefined' ? result.POSITION : -1) + 1
+            const len = (result.LIST && result.LIST.length) || 0
+            progress += `Прогресс: ${pos} / ${len} ( ${len &&
+              Math.round((100 * pos) / len)}% )`
+            if (pos == 0) {
+              showSelectedButton(['start'])
+            } else {
+              if (pos != len) {
+                chrome.runtime.sendMessage('getState', state => {
+                  showSelectedButton([
+                    // 'restart',
+                    state == 'pause' ? 'continue' : 'pause'
+                  ])
+                })
+              } else {
+                progressmessage += 'Все видео просмотрены'
+                showSelectedButton(['restart'])
+                chrome.runtime.sendMessage('updateList', response =>
+                  responseTipical(response)
+                )
+              }
+            }
+          } catch (err) {
+            console.log('ошибос прогресса и кнопок', err)
+            progressmessage +=
+              'Произошла ошибка в интерфейсе, возможны проблемы.' +
+              'Сообщите владельцу, опишите что делали.'
           }
+          setMessage(progressmessage)
         }
-      } catch (err) {
-        console.log('ошибос прогресса и кнопок', err)
-        progressmessage +=
-          'Произошла ошибка в интерфейсе, возможны проблемы.' +
-          'Сообщите владельцу, опишите что делали.'
       }
-      setMessage(progressmessage)
-    }
 
-    document.querySelector('#progress').textContent = progress
-  })
+      document.querySelector('#progress').textContent = progress
+    }
+  )
 }
 
 function setMessage (message) {

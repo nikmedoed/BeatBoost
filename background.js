@@ -1,14 +1,16 @@
 import {
-  loadNewList,
   stopPlay,
   startPlay,
   getState,
-  sendToSheet
+  sendToSheet,
+  stateChangeIfClosed
 } from './logic.js'
+
+import { loadNewList, loadGroups } from './loader.js'
 
 async function reStartPlaying () {
   new Promise((resolve, reject) => {
-    chrome.storage.sync.set({ POSITION: -1 }, () =>
+    chrome.storage.local.set({ POSITION: -1 }, () =>
       startPlay()
         .then(() => resolve(true))
         .catch(() => resolve(false))
@@ -24,6 +26,11 @@ async function onEventHandler (message, sender, sendResponse) {
         // console.log('getState', state)
         sendResponse(state)
         break
+      case 'getGroups':
+        let groups = await loadGroups()
+        // console.log('getGroups', groups)
+        sendResponse(groups)
+        break
       case 'restart': // Для разработки пригодится начинать сначала
       case 'updateList':
         let values = await loadNewList(message == 'restart')
@@ -31,7 +38,7 @@ async function onEventHandler (message, sender, sendResponse) {
         sendResponse({ success: values.POSITION < values.LIST.length - 1 })
         // })
         break
-      // case 'restart': // убрать перед сборкой
+      // case 'restart': // убрать перед сборкой, если будет кнопка начать сначала
       case 'start':
         stopPlay()
         sendResponse({ success: await reStartPlaying() })
@@ -57,9 +64,10 @@ chrome.runtime.onMessageExternal.addListener(function (
   sender,
   sendResponse
 ) {
-  // console.log(message)
+  console.log(message)
   if (message.user) {
-    sendToSheet(user, percent)
+    console.log("ogo onMessageExternal")
+    // sendToSheet(user, percent)
   }
   sendResponse('ok')
   return true
@@ -70,9 +78,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true
 })
 
+chrome.tabs.onRemoved.addListener(stateChangeIfClosed)
+
 chrome.runtime.onInstalled.addListener(function (details) {
   chrome.storage.local.set({ STATE: 'pause' })
-  // chrome.storage.sync.set({ POSITION: -1 })
+  // chrome.storage.local.set({ POSITION: -1 })
   // Сбросит статус у тех, кто обновляет, не надо
   loadNewList()
 })

@@ -3,16 +3,18 @@ import {
   TIMER_RANDOM_PART_MINUTES,
   LIKE_PAUSE_MINUTES,
   LIKE_PAUSE_RANDOM_PART_MINUTES,
-  FILE_LINK,
-  SHEET_API_LINK,
+  STATISTIC_LINK,
   TABID,
   STATE,
   POSITION,
   LIST,
   USER,
   SUBSCRIBE_PAUSE_MINUTES,
-  SUBSCRIBE_PAUSE_RANDOM_PART_MINUTES
+  SUBSCRIBE_PAUSE_RANDOM_PART_MINUTES,
+  GROUP
 } from './constants.js'
+
+import { loadNewList } from './loader.js'
 
 import { likeVideoInjection } from './likeinjection.js'
 
@@ -23,31 +25,43 @@ function randomInMS (fix, rnd) {
 async function likeManager (tabId) {
   setTimeout(
     () =>
-      chrome.scripting.executeScript({
-        target: {
-          tabId: tabId
-        },
-        func: likeVideoInjection,
-        args: [
-          randomInMS(LIKE_PAUSE_MINUTES, LIKE_PAUSE_RANDOM_PART_MINUTES),
-          randomInMS(
-            SUBSCRIBE_PAUSE_MINUTES,
-            SUBSCRIBE_PAUSE_RANDOM_PART_MINUTES
+      chrome.scripting
+        .executeScript({
+          target: {
+            tabId: tabId
+          },
+          func: likeVideoInjection,
+          args: [
+            randomInMS(LIKE_PAUSE_MINUTES, LIKE_PAUSE_RANDOM_PART_MINUTES),
+            randomInMS(
+              SUBSCRIBE_PAUSE_MINUTES,
+              SUBSCRIBE_PAUSE_RANDOM_PART_MINUTES
+            )
+          ]
+        })
+        .catch(() =>
+          console.log(
+            'Не получилось внедрить скрипт в страницу, вероятно, она закрыта.'
           )
-        ]
-      }),
+        ),
     3000
   )
 }
 
-export function sendToSheet (user, percent) {
-  return fetch(SHEET_API_LINK, {
-    method: 'POST',
-    body: JSON.stringify({
-      user: user,
-      progress: percent
-    })
-  }).catch(e => console.log('Ошибка отправки статистики', e))
+export function sendToSheet (user, percent, group) {
+  return fetch(STATISTIC_LINK)
+    .then(resp => resp.text())
+    .then(link =>
+      fetch(link, {
+        method: 'POST',
+        body: JSON.stringify({
+          user: user,
+          progress: percent,
+          group: group
+        })
+      })
+    )
+    .catch(e => console.log('Ошибка отправки статистики', e))
 }
 
 async function getUser (percent, extensionId) {
@@ -71,11 +85,13 @@ async function getUser (percent, extensionId) {
 
 async function sendStat () {
   return new Promise((resolve, reject) => {
-    chrome.storage.sync.get([POSITION, LIST, USER], result => {
+    chrome.storage.local.get([POSITION, LIST, USER, GROUP], result => {
       const pos = result.POSITION + 1
       const len = result.LIST.length
       let percent = Math.round((100 * pos) / len)
-      sendToSheet(result.USER, percent)
+      if (pos % 50 == 0 || pos == len) {
+        sendToSheet(result.USER, percent, result.GROUP)
+      }
       resolve(true)
     })
   })
@@ -94,7 +110,7 @@ export function opener () {
   chrome.storage.local.get([TABID], val => {
     const tabId = val.TABID
     if (tabId) {
-      chrome.storage.sync.get([POSITION, LIST], result => {
+      chrome.storage.local.get([POSITION, LIST], result => {
         let toPlay =
           (result.POSITION !== 'undefined' ? result.POSITION : -1) + 1
         const list = result.LIST
@@ -110,12 +126,12 @@ export function opener () {
               const timer =
                 TIMER_MIN_MINUTES + Math.random() * TIMER_RANDOM_PART_MINUTES
 
-              console.log('timer', timer)
+              // console.log('timer', timer)
               chrome.alarms.create('nextVideo', { delayInMinutes: timer })
               if (toPlay == list.length - 1) {
                 await loadNewList()
               }
-              chrome.storage.sync.set(
+              chrome.storage.local.set(
                 {
                   POSITION: toPlay
                 },
@@ -150,12 +166,26 @@ export async function getState () {
   })
 }
 
+export function stateChangeIfClosed (tabId, removeInfo) {
+  chrome.storage.local.get(TABID, val => {
+    if (val.TABID == tabId) {
+      pausePlaying()
+    }
+  })
+}
+
+function pausePlaying () {
+  chrome.storage.local.set({ TABID: null, STATE: 'pause' }, updateInterface)
+}
+
 export function stopPlay () {
   chrome.storage.local.get(TABID, val => {
-    try {
-      chrome.tabs.remove(val.TABID)
-    } catch {}
-    chrome.storage.local.set({ TABID: null, STATE: 'pause' }, updateInterface)
+    if (val.TABID) {
+      chrome.tabs
+        .remove(val.TABID)
+        .catch(() => console.log('Вкладка уже закрыта'))
+    }
+    pausePlaying()
   })
 }
 
@@ -165,41 +195,4 @@ export function startPlay () {
     .then(tab => {
       chrome.storage.local.set({ TABID: tab.id, STATE: 'play' }, opener)
     })
-}
-
-export async function loadNewList (notification = false) {
-  return fetch(FILE_LINK)
-    .then(response => response.text())
-    .then(resp => resp.trim().split('\n'))
-    .then(
-      list =>
-        new Promise((resolve, reject) => {
-          chrome.storage.sync.get([POSITION, LIST], result => {
-            let position = -1
-            let updated = false
-            if (result.POSITION && result.POSITION >= 0) {
-              position = list.indexOf(result.LIST[result.POSITION])
-              updated = position > -1 && result.LIST[0] != list[0]
-            }
-            if (notification) {
-              chrome.notifications.create(null, {
-                title: 'BeatBoost - список просмотра',
-                message: `${
-                  updated
-                    ? 'Список обновился 👍🏻'
-                    : '😧 На сервере нет новых ссылок для просмотра'
-                }`,
-                type: 'basic',
-                iconUrl: 'icon.png',
-                silent: true
-              })
-            }
-            const values = {
-              POSITION: position,
-              LIST: list
-            }
-            chrome.storage.sync.set(values, () => resolve(values))
-          })
-        })
-    )
 }

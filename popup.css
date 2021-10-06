@@ -56,6 +56,12 @@
     margin-bottom: 8px;
 }
 
+#resetbutton{
+    position: fixed;
+    right: 16px;
+    top:16px
+}
+
 .name {
     height: 3%;
     font-family: "GT Walsheim Pro";
@@ -66,6 +72,12 @@
     display: flex;
     text-align: center;
     margin-bottom: 1em;
+}
+
+#groupselect {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
 }
 
 #progress {
@@ -125,7 +137,7 @@ input {
     background-color: #1d202b;
     transition: all 250ms ease;
     color: white;
-    text-align: center; 
+    text-align: center;
 }
 
 input:hover {
@@ -142,4 +154,103 @@ input:focus {
     transform: scale(1.03);
     background-color: #1d202b;
     box-shadow: 0 0 0 1pt #FFB400;
+}
+
+
+@-webkit-keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    50% {
+        transform: rotate(180deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    50% {
+        transform: rotate(180deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@-webkit-keyframes rotate2 {
+    0% {
+        transform: rotate(0deg);
+        border-top-color: rgba(255, 255, 255, 0.5);
+    }
+
+    50% {
+        transform: rotate(180deg);
+        border-top-color: rgba(255, 159, 0, 0.5);
+    }
+
+    100% {
+        transform: rotate(360deg);
+        border-top-color: rgba(255, 255, 255, 0.5);
+    }
+}
+
+@keyframes rotate2 {
+    0% {
+        transform: rotate(0deg);
+        border-top-color: rgba(255, 255, 255, 0.5);
+    }
+
+    50% {
+        transform: rotate(180deg);
+        border-top-color: rgba(255, 159, 0, 0.5);
+    }
+
+    100% {
+        transform: rotate(360deg);
+        border-top-color: rgba(255, 255, 255, 0.5);
+    }
+}
+
+* {
+    box-sizing: border-box;
+}
+
+
+.loader {
+    position: relative;
+    margin: 15px 100px;
+    width: 110px;
+    height: 110px;
+    display: block;
+    overflow: hidden;
+}
+
+.loader div {
+    height: 100%;
+}
+
+.loader4,
+.loader4 div {
+    border-radius: 50%;
+    padding: 8px;
+    border: 2px solid transparent;
+    -webkit-animation: rotate linear 3.5s infinite;
+    animation: rotate linear 3.5s infinite;
+    border-radius: 50%;
+    padding: 4px;
+    -webkit-animation: rotate2 4s infinite linear;
+    animation: rotate2 4s infinite linear;
+}
+
+.loader,
+.loader * {
+    will-change: transform;
 }
