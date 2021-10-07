@@ -66,7 +66,7 @@ chrome.runtime.onMessageExternal.addListener(function (
 ) {
   console.log(message)
   if (message.user) {
-    console.log("ogo onMessageExternal")
+    console.log('ogo onMessageExternal')
     // sendToSheet(user, percent)
   }
   sendResponse('ok')

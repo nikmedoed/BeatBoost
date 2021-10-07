@@ -21,7 +21,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 320px;
+    min-width: 360px;
 }
 
 
@@ -56,10 +56,10 @@
     margin-bottom: 8px;
 }
 
-#resetbutton{
+#resetbutton {
     position: fixed;
     right: 16px;
-    top:16px
+    top: 16px
 }
 
 .name {

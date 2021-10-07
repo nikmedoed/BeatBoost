@@ -1,14 +1,16 @@
 export function likeVideoInjection (timeToLike, timeToSubscribe) {
   if (Math.random() > 0.5) {
     setTimeout(() => {
-      document.querySelectorAll('ytd-toggle-button-renderer')[0].click()
+      let buttonclass =
+        'ytd-toggle-button-renderer.style-scope.ytd-menu-renderer.force-icon-button'
+      document.querySelectorAll(buttonclass)[0].click()
       setTimeout(() => {
         let notifEl = document.querySelector(
           'yt-formatted-string#text.yt-notification-action-renderer'
         )
         const notifText = notifEl.innerText.toString()
         if (notifText.includes('Удалено') || notifText.includes('Deleted')) {
-          document.querySelectorAll('ytd-toggle-button-renderer')[0].click()
+          document.querySelectorAll(buttonclass)[0].click()
         }
       }, 3000)
     }, timeToLike)
