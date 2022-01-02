@@ -1,6 +1,14 @@
-import { WATCHLINKS_LINK, GROUP, POSITION, LIST } from './constants.js'
+import {
+  GROUP,
+  POSITION,
+  LIST,
+  SETTINGS,
+  SETTINGS_PLAYLIST
+} from './constants.js'
 
-function getGroup () {
+import { loadSettings } from './settings.js'
+
+function getUserGroup() {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get(GROUP, val => {
       if (chrome.runtime.lastError) {
@@ -11,10 +19,10 @@ function getGroup () {
   })
 }
 
-export async function loadNewList (notification = false) {
-  const group = await getGroup()
-  return fetch(WATCHLINKS_LINK)
-    .then(resp => resp.text())
+export async function loadNewList(notification = false) {
+  const group = await getUserGroup()
+  return loadSettings()
+    .then(val => val.linksSheet)
     .then(link => fetch(`${link}?getLinks=${group}`))
     .then(response => response.json())
     .then(
@@ -31,11 +39,10 @@ export async function loadNewList (notification = false) {
             if (notification) {
               chrome.notifications.create(null, {
                 title: 'BeatBoost - список просмотра',
-                message: `${
-                  updated
+                message: `${updated
                     ? 'Список обновился 👍🏻'
                     : '😧 На сервере нет новых ссылок для просмотра'
-                }`,
+                  }`,
                 type: 'basic',
                 iconUrl: 'icon.png',
                 silent: true
@@ -43,7 +50,8 @@ export async function loadNewList (notification = false) {
             }
             const values = {
               POSITION: position,
-              LIST: list
+              LIST: list,
+              SETTINGS_PLAYLIST: linksobject.settings
             }
             chrome.storage.local.set(values, () => resolve(values))
           })
@@ -51,9 +59,9 @@ export async function loadNewList (notification = false) {
     )
 }
 
-export async function loadGroups () {
-  return fetch(WATCHLINKS_LINK)
-    .then(resp => resp.text())
+export async function loadGroups() {
+  return loadSettings()
+    .then(val => val.linksSheet)
     .then(link =>
       fetch(`${link}?getGroups=${Math.floor(Math.random() * 999999) + 100000}`)
     )

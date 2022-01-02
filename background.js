@@ -2,13 +2,12 @@ import {
   stopPlay,
   startPlay,
   getState,
-  sendToSheet,
   stateChangeIfClosed
-} from './logic.js'
+} from './controls.js'
 
 import { loadNewList, loadGroups } from './loader.js'
 
-async function reStartPlaying () {
+async function reStartPlaying() {
   new Promise((resolve, reject) => {
     chrome.storage.local.set({ POSITION: -1 }, () =>
       startPlay()
@@ -18,7 +17,7 @@ async function reStartPlaying () {
   })
 }
 
-async function onEventHandler (message, sender, sendResponse) {
+async function onEventHandler(message, sender, sendResponse) {
   try {
     switch (message) {
       case 'getState':
@@ -59,21 +58,12 @@ async function onEventHandler (message, sender, sendResponse) {
   }
 }
 
-chrome.runtime.onMessageExternal.addListener(function (
-  message,
-  sender,
-  sendResponse
-) {
-  console.log(message)
-  if (message.user) {
-    console.log('ogo onMessageExternal')
-    // sendToSheet(user, percent)
-  }
-  sendResponse('ok')
-  return true
-})
+
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.account){
+    chrome.storage.local.set({ ACCOUNT: message.account })
+  }
   onEventHandler(message, sender, sendResponse)
   return true
 })
@@ -82,7 +72,7 @@ chrome.tabs.onRemoved.addListener(stateChangeIfClosed)
 
 chrome.runtime.onInstalled.addListener(function (details) {
   chrome.storage.local.set({ STATE: 'pause' })
-  // chrome.storage.local.set({ POSITION: -1 })
+  chrome.storage.local.set({ POSITION: -1 })
   // Сбросит статус у тех, кто обновляет, не надо
   loadNewList()
 })

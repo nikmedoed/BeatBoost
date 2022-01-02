@@ -1,4 +1,4 @@
-export function likeVideoInjection (timeToLike, timeToSubscribe) {
+export function likeVideoInjection(timeToLike, timeToSubscribe) {
   if (Math.random() > 0.5) {
     setTimeout(() => {
       let buttonclass =
@@ -25,4 +25,25 @@ export function likeVideoInjection (timeToLike, timeToSubscribe) {
       }
     }, timeToSubscribe)
   }
+}
+
+
+export async function getUser(extensionId) {
+  setTimeout(
+    async () => {
+      document.querySelector('#avatar-btn').click()
+      let user = await new Promise((resolve, reject) => {
+        setTimeout(
+          () => resolve(document.querySelector('#account-name').innerText),
+          1000
+        )
+      })
+      chrome.runtime.sendMessage(
+        extensionId,
+        { account: user },
+        res => resolve(true)
+      )
+    },
+    3000
+  )
 }
