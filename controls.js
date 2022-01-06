@@ -1,5 +1,5 @@
 import {
-  TABID,
+  TABSID,
   STATE,
 } from './constants.js'
 
@@ -22,26 +22,27 @@ export async function getState() {
 }
 
 export function stateChangeIfClosed(tabId, removeInfo) {
-  chrome.storage.local.get(TABID, val => {
-    if (val.TABID == tabId) {
-      pausePlaying()
+  chrome.storage.local.get(TABSID, val => {
+    if (val.TABSID && val.TABSID.indexOf(tabId) !==-1) {
+      stopPlay()
     }
   })
 }
 
 export function pausePlaying() {
   chrome.storage.local.set({
-    TABID: null,
+    TABSID: null,
     STATE: 'pause'
   }, updateInterface)
 }
 
 export function stopPlay() {
-  chrome.storage.local.get(TABID, val => {
-    if (val.TABID) {
-      chrome.tabs
-        .remove(val.TABID)
-        .catch(() => console.log('Вкладка уже закрыта'))
+  chrome.storage.local.get(TABSID, val => {
+    if (val.TABSID) {
+      Promise.all(
+        val.TABSID.map(tabId => chrome.tabs.remove(tabId)
+          .catch(e => console.log('Вкладка уже закрыта', e)))
+      )
     }
     pausePlaying()
   })
@@ -49,10 +50,13 @@ export function stopPlay() {
 
 export function startPlay() {
   return loadNewList()
-    .then(() => chrome.tabs.create({}))
-    .then(tab => {
+    .then(listData => Promise.all(
+      Array(listData.SETTINGS_PLAYLIST.TabsNumber).fill(1)
+        .map(e => chrome.tabs.create({}))
+    ))
+    .then(tabs => {
       return chrome.storage.local.set({
-        TABID: tab.id,
+        TABSID: tabs.map(tab => tab.id),
         STATE: 'play'
       })
     }).then(() => opener(true))

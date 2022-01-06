@@ -61,7 +61,7 @@ async function onEventHandler(message, sender, sendResponse) {
 
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.account){
+  if (message.account) {
     chrome.storage.local.set({ ACCOUNT: message.account })
   }
   onEventHandler(message, sender, sendResponse)

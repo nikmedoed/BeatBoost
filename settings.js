@@ -31,6 +31,7 @@ function parseINIString (data) {
 }
 
 export function loadSettings (settingsLink = GIST) {
+  
   return fetch(settingsLink)
     .then(resp => resp.text())
     .then(text => {
@@ -40,6 +41,9 @@ export function loadSettings (settingsLink = GIST) {
         statSheet: sett.SETTINGS.STAT_SHEET
       }
       chrome.storage.local.set({ SETTINGS: settings }) 
+
+      // console.log("loadSettings", settings)
+
       return settings
     })
 }

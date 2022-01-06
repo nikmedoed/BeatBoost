@@ -1,9 +1,7 @@
 import {
   GROUP,
   POSITION,
-  LIST,
-  SETTINGS,
-  SETTINGS_PLAYLIST
+  LIST
 } from './constants.js'
 
 import { loadSettings } from './settings.js'
@@ -33,6 +31,9 @@ export async function loadNewList(notification = false) {
             let position = -1
             let updated = false
             if (result.POSITION && result.POSITION >= 0) {
+
+              // console.log("updatelist", result.POSITION, result.LIST[result.POSITION])
+
               position = list.indexOf(result.LIST[result.POSITION])
               updated = position > -1 && result.LIST[0] != list[0]
             }
@@ -40,8 +41,8 @@ export async function loadNewList(notification = false) {
               chrome.notifications.create(null, {
                 title: 'BeatBoost - список просмотра',
                 message: `${updated
-                    ? 'Список обновился 👍🏻'
-                    : '😧 На сервере нет новых ссылок для просмотра'
+                  ? 'Список обновился 👍🏻'
+                  : '😧 На сервере нет новых ссылок для просмотра'
                   }`,
                 type: 'basic',
                 iconUrl: 'icon.png',
@@ -53,7 +54,9 @@ export async function loadNewList(notification = false) {
               LIST: list,
               SETTINGS_PLAYLIST: linksobject.settings
             }
+            // console.log("table answer", values)
             chrome.storage.local.set(values, () => resolve(values))
+            return values
           })
         })
     )

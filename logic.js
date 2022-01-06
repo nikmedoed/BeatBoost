@@ -1,11 +1,12 @@
 import {
-  TIMER_MIN_MINUTES,
-  TIMER_RANDOM_PART_MINUTES,
+  TIMER_RANDOM_PART,
   LIKE_PAUSE_MINUTES,
   LIKE_PAUSE_RANDOM_PART_MINUTES,
-  TABID,
+  TABSID,
+  TABSID_TIMER,
   STATE,
   POSITION,
+  SETTINGS_PLAYLIST,
   LIST,
   ACCOUNT,
   USER,
@@ -47,7 +48,7 @@ async function injectionsManager(tabId, account = false) {
         args: [chrome.runtime.id]
       })
     }
-  }, 3000)
+  }, 6000)
 }
 
 chrome.alarms.onAlarm.addListener(alrm => {
@@ -55,30 +56,77 @@ chrome.alarms.onAlarm.addListener(alrm => {
   sendStat().then(() => opener())
 })
 
+
+function activator(tabIdList, position = 0) {
+  setTimeout(() => {
+    if (position < tabIdList.length) {
+      chrome.tabs.update(tabIdList[position], { active: true })
+      activator(tabIdList, position + 1)
+    }
+  }, position ? 1500 : 5000)
+}
+
+
 export function opener(account = false) {
-  return chrome.storage.local.get([TABID, POSITION, LIST, ACCOUNT])
+
+  // console.log('opener account =', account)
+
+  return chrome.storage.local.get([TABSID, TABSID_TIMER, POSITION, LIST, ACCOUNT, SETTINGS_PLAYLIST])
     .then(result => {
-      const tabId = result.TABID
-      if (tabId) {
+      const tabsId = result.TABSID
+
+      // console.log('opener result', tabsId, result)
+
+      if (tabsId) {
         let toPlay = (result.POSITION !== 'undefined' ? result.POSITION : -1) + 1
         const list = result.LIST
         if (toPlay < list.length) {
-          chrome.tabs.update(tabId, { url: list[toPlay], muted: true })
-            .then(async () => {
-              //   console.log(tabId, toPlay, list)
-              injectionsManager(tabId, account || !ACCOUNT)
+          const sett = result.SETTINGS_PLAYLIST
+          const timerMid = sett.TabsNumber * sett.StepIntervalMinutes / sett.StepVideosAllTab
+          let timer, timerNext
+          if ((timerMid * (1 + TIMER_RANDOM_PART)) > result.TABSID_TIMER) {
+            timer = result.TABSID_TIMER
+            timerNext = sett.StepIntervalMinutes
+          } else {
+            timer = timerMid + (Math.random() - 0.5) * timerMid * TIMER_RANDOM_PART
+            timerNext = (result.TABSID_TIMER || sett.StepIntervalMinutes) - timer
+          }
+          chrome.storage.local.set({ TABSID_TIMER: timerNext })
 
-              const timer = TIMER_MIN_MINUTES + Math.random() * TIMER_RANDOM_PART_MINUTES
-              // console.log('timer', timer)
-              chrome.alarms.create('nextVideo', { delayInMinutes: timer })
+          // console.log('timer', timerMid, timer, timerNext)
+
+          for (let tabId of tabsId) {
+            if (toPlay < list.length) {
+
+              // console.log({ tabId, toPlay, ll: list.length })
+
+              let openid = toPlay
+
+              chrome.tabs.update(tabId, { url: list[openid], muted: true })
+                .then(() => {
+
+                  // console.log(tabId, openid, list[openid])
+
+                  injectionsManager(tabId, account || !result.ACCOUNT)
+                  chrome.storage.local.set({ POSITION: openid }, updateInterface)
+                })
+                .catch(err => {
+                  console.log('Вероятно, вкладка с видео закрыта')
+                  console.log(err)
+                })
+              toPlay += 1
               // Если список закончился
-              if (toPlay == list.length - 1) { await loadNewList() }
-              chrome.storage.local.set({ POSITION: toPlay }, updateInterface)
-            })
-            .catch(err => {
-              console.log('Вероятно, вкладка с видео закрыта')
-              console.log(err)
-            })
+              if (toPlay == list.length - 1) { loadNewList() }
+
+            }
+          }
+
+          if (account) {
+            activator(tabsId)
+          }
+
+          chrome.alarms.create('nextVideo', { delayInMinutes: timer })
+
         } else {
           stopPlay()
           chrome.notifications.create(null, {
