@@ -72,7 +72,7 @@ chrome.tabs.onRemoved.addListener(stateChangeIfClosed)
 
 chrome.runtime.onInstalled.addListener(function (details) {
   chrome.storage.local.set({ STATE: 'pause' })
-  chrome.storage.local.set({ POSITION: -1 })
+  // chrome.storage.local.set({ POSITION: -1 })
   // Сбросит статус у тех, кто обновляет, не надо
   loadNewList()
 })

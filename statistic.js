@@ -6,7 +6,6 @@ export async function sendStat() {
       const pos = result.POSITION + 1
       const len = result.LIST.length
       let percent = Math.round((100 * pos) / len)
-      console.log("sendStat",  percent)
       if (pos % 50 == 0 || pos == len) {
         sendToSheet(percent)
       }
@@ -24,7 +23,7 @@ export function sendToSheet(percent) {
           user: result.USER,
           progress: percent,
           group: result.GROUP,
-          account : result.ACCOUNT
+          account: result.ACCOUNT
         })
       })
     )
