@@ -41,9 +41,6 @@ export function loadSettings (settingsLink = GIST) {
         statSheet: sett.SETTINGS.STAT_SHEET
       }
       chrome.storage.local.set({ SETTINGS: settings }) 
-
-      // console.log("loadSettings", settings)
-
       return settings
     })
 }

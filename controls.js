@@ -15,7 +15,6 @@ export function updateInterface() {
 export async function getState() {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get(STATE, result => {
-      //   console.log('result.STATE ', result)
       resolve(result.STATE || 'pause')
     })
   })
@@ -23,7 +22,7 @@ export async function getState() {
 
 export function stateChangeIfClosed(tabId, removeInfo) {
   chrome.storage.local.get(TABSID, val => {
-    if (val.TABSID && val.TABSID.indexOf(tabId) !==-1) {
+    if (val.TABSID && val.TABSID.indexOf(tabId) !== -1) {
       stopPlay()
     }
   })

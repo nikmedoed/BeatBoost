@@ -5,7 +5,9 @@ import {
   stateChangeIfClosed
 } from './controls.js'
 
+
 import { loadNewList, loadGroups } from './loader.js'
+
 
 async function reStartPlaying() {
   new Promise((resolve, reject) => {
@@ -17,23 +19,21 @@ async function reStartPlaying() {
   })
 }
 
+
 async function onEventHandler(message, sender, sendResponse) {
   try {
     switch (message) {
       case 'getState':
         let state = await getState()
-        // console.log('getState', state)
         sendResponse(state)
         break
       case 'getGroups':
         let groups = await loadGroups()
-        // console.log('getGroups', groups)
         sendResponse(groups)
         break
       case 'restart': // Для разработки пригодится начинать сначала
       case 'updateList':
         let values = await loadNewList(message == 'restart')
-        // console.log('values', values)
         sendResponse({ success: values.POSITION < values.LIST.length - 1 })
         // })
         break
@@ -48,7 +48,6 @@ async function onEventHandler(message, sender, sendResponse) {
         break
       case 'continue':
         startPlay()
-        // TODO научиться делать паузу не закрывая вкладку, но отслеживая закрытие
         sendResponse({ success: true })
         break
     }
@@ -57,7 +56,6 @@ async function onEventHandler(message, sender, sendResponse) {
     sendResponse({ success: false })
   }
 }
-
 
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -72,7 +70,5 @@ chrome.tabs.onRemoved.addListener(stateChangeIfClosed)
 
 chrome.runtime.onInstalled.addListener(function (details) {
   chrome.storage.local.set({ STATE: 'pause' })
-  // chrome.storage.local.set({ POSITION: -1 })
-  // Сбросит статус у тех, кто обновляет, не надо
   loadNewList()
 })

@@ -9,7 +9,7 @@ export const SUBSCRIBE_PAUSE_MINUTES = DEV ? 0.1 : 1
 export const SUBSCRIBE_PAUSE_RANDOM_PART_MINUTES = DEV ? 0.05 : 1
 
 export const GIST =
-  'https://gist.githubusercontent.com/nikmedoed/0a196549628611b0cfe4c74f8f0322e6/raw/Settings'+ (DEV ? '_dev' : '')
+  'https://gist.githubusercontent.com/nikmedoed/0a196549628611b0cfe4c74f8f0322e6/raw/Settings' + (DEV ? '_dev' : '')
 
 export const TABSID = 'TABSID'
 export const TABSID_TIMER = 'TABSID_TIMER'
